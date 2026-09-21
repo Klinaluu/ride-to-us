@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ride to Us">
+<meta name="theme-color" content="#2b2030">
+<title>Ride to Us</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ TITLE ============ -->
+  <section id="screen-title" class="screen active pink-bg">
+    <div class="win title-win">
+      <div class="win-bar"><span>RIDE_TO_US.EXE</span><i class="win-x">✕</i></div>
+      <div class="win-body title-card">
+        <h1 class="game-title">RIDE TO US</h1>
+        <p class="game-subtitle">Our first year journey</p>
+        <img class="title-hero photo" src="Assets2/photos/photobooth.jpg" alt="">
+        <button id="btn-start" class="pixel-btn primary">▶ Start the journey</button>
+        <div class="title-tip"><img class="tip-icon" src="Assets2/4x/Item-Key-Helmet-01.png" alt="">◀ ▶ move · ▲ jump · ▲▲ double jump · F full screen</div>
+        <div class="title-tip touch-only">best on iPad, landscape · add to Home Screen for full screen</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-level" class="screen">
+    <div class="canvas-wrap">
+      <canvas id="game-canvas" width="960" height="360"></canvas>
+    </div>
+    <div class="level-top-ui">
+      <header class="hud">
+        <div id="hud-hearts" class="hud-hearts"></div>
+        <div id="hud-items" class="hud-items"></div>
+        <div id="hud-milestone" class="hud-milestone hidden"></div>
+        <div id="hud-stats" class="hud-stats"><span id="hud-score">00000</span><span id="hud-time">0:00</span></div>
+        <img id="hud-portrait" class="hud-portrait hidden" src="Assets2/4x/Portrait-Woman-01.png" alt="">
+        <img id="hud-bar" class="hud-bar" src="Assets2/UI-Pixel/4x/Bar-0.png" alt="">
+      </header>
+    </div>
+    <div id="hud-hint" class="hud-hint hidden"></div>
+    <div id="bubble-man" class="speech-bubble hidden"></div>
+    <div class="level-bottom-ui">
+      <div class="controls-hint"><span class="hint-kb">◀ ▶ move · ▲ jump · ▲▲ double jump · tap to open</span><span class="hint-touch">hold ◀ ▶ to move · tap ▲ to jump · tap ▲ twice to jump higher</span></div>
+      <div class="touch-controls">
+        <div class="pad-left">
+          <button id="btn-left" class="touch-btn">◀</button>
+          <button id="btn-right" class="touch-btn">▶</button>
+        </div>
+        <div class="pad-right">
+          <button id="btn-jump" class="touch-btn jump">▲</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEET (stars) ============ -->
+  <section id="screen-meet" class="screen night">
+    <div class="stars-layer"></div>
+    <div class="shooting a"></div>
+    <div class="shooting b"></div>
+    <div class="shooting c"></div>
+    <div class="meet-content">
+      <img class="meet-couple" src="Assets2/4x/Couple-Pose-Happy-01.png" alt="">
+      <p id="meet-text" class="meet-text"></p>
+      <div id="meet-stats" class="meet-stats"></div>
+      <button id="btn-meet-continue" class="pixel-btn primary">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- ============ UNLOCK ============ -->
+  <section id="screen-unlock" class="screen night">
+    <div class="stars-layer"></div>
+    <div class="unlock-content">
+      <div class="padlock">
+        <div class="shackle"></div>
+        <div class="lock-body"><div class="keyhole"></div></div>
+      </div>
+      <div class="unlock-title">Level Unlocked</div>
+      <button id="btn-unlock-continue" class="pixel-btn primary">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- ============ ENDING ============ -->
+  <section id="screen-ending" class="screen pink-bg">
+    <div class="win ending-win">
+      <div class="win-bar"><span>Completed</span><i class="win-x">✕</i></div>
+      <div class="win-body ending-content">
+        <img class="ending-couple" src="Assets2/4x/Scene-Terrace-Bike-Iso-01.png" alt="">
+        <button id="btn-play-again" class="pixel-btn primary">▶ Play again</button>
+        <div class="ending-sub">— or watch again —</div>
+        <div class="ending-row">
+          <button id="btn-ending-letter" class="pixel-btn">💌 Love letter</button>
+          <button id="btn-ending-video" class="pixel-btn">🎬 Little movie</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<button id="btn-fullscreen" class="sound-btn fs-btn" aria-label="Full screen">⛶</button>
+<button id="btn-sound" class="sound-btn" aria-label="Sound on">🔊</button>
+
+<!-- nhắc xoay ngang khi cầm iPad dọc -->
+<div id="rotate-overlay">
+  <div class="win small">
+    <div class="win-bar dark"><span>ROTATE_DEVICE</span><i class="win-x">✕</i></div>
+    <div class="win-body">
+      <div class="rotate-icon">⟳</div>
+      <div class="box-title">Please rotate to landscape</div>
+      <div class="box-text">This journey is best enjoyed sideways.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODALS (cửa sổ retro) ============ -->
+<div id="modal-gameover" class="modal hidden">
+  <div class="win small">
+    <div class="win-bar danger"><span>GAME_OVER</span><i class="win-x">✕</i></div>
+    <div class="win-body">
+      <div class="box-title">Out of hearts!</div>
+      <div class="box-text">The gifts you found are safe. Try that stretch again.</div>
+      <button id="btn-retry" class="pixel-btn primary">↻ Try again</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-system" class="modal hidden">
+  <div class="win system">
+    <div class="win-bar dark"><span>⚠ SYSTEM MESSAGE</span><i class="win-x">✕</i></div>
+    <div class="win-body">
+      <div id="system-text" class="system-text"></div>
+      <div id="system-reply" class="system-reply"></div>
+      <div class="system-buttons">
+        <button id="btn-sys-maybe" class="pixel-btn">Maybe</button>
+        <button id="btn-sys-yes" class="pixel-btn primary">Definitely!</button>
+        <button id="btn-sys-stop" class="pixel-btn">Stop!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-envelope" class="modal hidden">
+  <div class="win envelope-win">
+    <div class="win-bar"><span>INCOMING_MAIL</span><i class="win-x">✕</i></div>
+    <div class="win-body">
+      <div class="envelope">
+        <div class="envelope-flap"></div>
+        <div class="envelope-stamp">CONFIDENTIAL</div>
+        <div id="envelope-label" class="envelope-label"></div>
+      </div>
+      <button id="btn-open-letter" class="pixel-btn primary">Read ➜</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-letter" class="modal hidden">
+  <div class="win letter-win">
+    <div class="win-bar"><span>Our 1 year's letter</span><button id="letter-close" class="win-x btn hidden">✕</button></div>
+    <div class="win-body letter-body">
+      <img class="letter-scene" src="Assets2/4x/Scene-Terrace-Sitting-Iso-01.png" alt="">
+      <pre id="letter-text" class="letter-text"></pre>
+      <button id="btn-watch-video" class="pixel-btn primary">🎬 Watch the little movie</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-video" class="modal hidden">
+  <div class="win video-win">
+    <div class="win-bar dark"><span>LITTLE_MOVIE.MP4</span><i class="win-x">✕</i></div>
+    <div class="win-body video-body">
+      <video id="video-player" controls playsinline preload="metadata"></video>
+      <div id="video-missing" class="box-text hidden">The little movie is on its way — check back soon 🎬</div>
+      <button id="btn-video-done" class="pixel-btn primary">Continue ▸</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

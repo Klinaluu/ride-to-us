@@ -1,0 +1,7 @@
+RIDE TO US
+
+1. Giải nén / unzip thư mục này (giữ nguyên cấu trúc bên trong).
+2. Mở file  Ride to Us.html  bằng Google Chrome (hoặc Edge). Double-click là được.
+3. Bàn phím: ◀ ▶ di chuyển · ▲ nhảy · ▲▲ nhảy đôi · click để mở hòm/thư.
+
+Nếu video không chạy trong Safari: mở bằng Chrome, hoặc double-click Play.command (macOS).
