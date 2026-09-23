@@ -455,6 +455,8 @@ function wireUI() {
   bind("btn-right", "ArrowRight");
   bind("btn-jump", "ArrowUp");
 
+  wireGamepad();
+
   let resizeTimer = null;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
@@ -464,6 +466,65 @@ function wireUI() {
       currentGame.resize(s.width, s.height);
     }, 150);
   });
+}
+
+// ---------------- tay cầm (Gamepad API) ----------------
+// Trái/phải: cần analog trái hoặc D-pad. Nhảy / chọn: A B X Y. Mở hòm thư: A khi đứng cạnh.
+// Ở các màn hình không phải lúc chơi, A/Start = bấm nút chính đang hiện.
+const PAD_FACE = [0, 1, 2, 3];
+const PAD_START = [9, 8];
+const DEAD_ZONE = 0.45;
+
+function wireGamepad() {
+  if (!navigator.getGamepads) return;
+  const prev = { left: false, right: false, jump: false, start: false };
+  const send = (now, name, key) => {
+    if (now === prev[name]) return;
+    prev[name] = now;
+    if (!currentGame) return;
+    if (now) currentGame.pressKey(key);
+    else currentGame.releaseKey(key);
+  };
+  // nút chính đang hiện (modal ưu tiên, rồi tới màn hình đang bật)
+  const primaryButton = () => {
+    const modal = document.querySelector(".modal:not(.hidden)");
+    if (modal) return modal.querySelector(".pixel-btn.primary, .pixel-btn");
+    const screen = document.querySelector(".screen.active:not(#screen-level)");
+    return screen ? screen.querySelector(".pixel-btn.primary, .pixel-btn") : null;
+  };
+  const poll = () => {
+    const pads = navigator.getGamepads();
+    let left = false;
+    let right = false;
+    let jump = false;
+    let start = false;
+    for (const p of pads) {
+      if (!p || !p.connected) continue;
+      const ax = p.axes[0] || 0;
+      const btn = (i) => !!(p.buttons[i] && p.buttons[i].pressed);
+      if (ax < -DEAD_ZONE || btn(14)) left = true;
+      if (ax > DEAD_ZONE || btn(15)) right = true;
+      if (PAD_FACE.some(btn)) jump = true;
+      if (PAD_START.some(btn)) start = true;
+    }
+    const pressedNow = (jump && !prev.jump) || (start && !prev.start);
+    const btnEl = primaryButton();
+    if (pressedNow && btnEl) {
+      // đang ở màn hình / hộp thoại → bấm nút thay vì nhảy
+      initAudio();
+      prev.jump = jump;
+      prev.start = start;
+      btnEl.click();
+    } else {
+      if (pressedNow) initAudio();
+      send(left, "left", "ArrowLeft");
+      send(right, "right", "ArrowRight");
+      send(jump, "jump", "ArrowUp");
+      prev.start = start;
+    }
+    requestAnimationFrame(poll);
+  };
+  requestAnimationFrame(poll);
 }
 
 async function init() {
