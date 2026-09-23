@@ -658,3 +658,38 @@ button { font-family: var(--font-body); cursor: pointer; }
   border: 3px dashed var(--ink);
   box-shadow: 5px 5px 0 var(--ink);
 }
+
+/* hướng dẫn thêm vào màn hình chính — dùng font thường vì font pixel không có dấu */
+.install-heading {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent-deep);
+  margin-bottom: 12px;
+}
+.install-steps {
+  margin: 0 0 16px;
+  padding-left: 22px;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.install-steps li + li { margin-top: 6px; }
+/* nút trong hộp thoại này dùng font thường cho đọc được dấu tiếng Việt */
+#modal-install .pixel-btn { font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: 0; padding: 11px 20px; }
+.tip-link {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0;
+  margin-left: auto;
+  margin-right: auto;
+  background: none;
+  border: 0;
+  padding: 6px 4px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

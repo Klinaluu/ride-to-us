@@ -6,6 +6,7 @@ import {
   SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, GAME_TITLE, EMPTY_POLAROIDS, PHOTO_PLACEHOLDER,
 } from "./content.js";
 import { initAudio, sfx, setMuted, isMuted } from "./audio.js";
+import { initInstallHint, maybeShowInstallHint, detectPlatform, isInstalled } from "./install.js";
 import { JourneyGame } from "./engine.js";
 
 let currentGame = null;
@@ -360,6 +361,11 @@ function wireUI() {
     true
   );
   // bật / tắt âm thanh
+  // dòng gợi ý dưới nút Start: bấm để mở lại hướng dẫn thêm vào màn hình chính
+  const installTip = $("title-install-tip");
+  if (detectPlatform() === "desktop" || isInstalled()) installTip.classList.add("hidden");
+  installTip.addEventListener("click", () => maybeShowInstallHint({ force: true }));
+
   const soundBtn = $("btn-sound");
   const renderSound = () => {
     soundBtn.textContent = isMuted() ? "🔇" : "🔊";
@@ -536,6 +542,7 @@ function wireGamepad() {
 async function init() {
   document.title = GAME_TITLE + " — Ride to Us";
   wireUI();
+  initInstallHint();
   const startBtn = $("btn-start");
   startBtn.textContent = "Loading…";
   startBtn.disabled = true;
