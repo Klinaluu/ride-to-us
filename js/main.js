@@ -69,6 +69,16 @@ function canvasSizeForViewport() {
   return { width, height };
 }
 
+// Hàng nút cảm ứng cao bao nhiêu (đổi sang px thế giới) — mặt đường luôn nằm trên nó
+function bottomInsetFor(canvasHeight) {
+  const pad = document.querySelector(".touch-controls");
+  if (!pad || getComputedStyle(pad).display === "none") return 0;
+  const padPx = pad.getBoundingClientRect().height;
+  if (!padPx) return 0;
+  const scale = canvasHeight / (window.innerHeight || canvasHeight);
+  return Math.round(padPx * scale) + 34; // chừa thêm một khoảng cho thoáng
+}
+
 // ---------------- helpers màn hình ----------------
 const $ = (id) => document.getElementById(id);
 function showScreen(id) {
@@ -197,7 +207,7 @@ function startJourney() {
   if (currentGame) currentGame.destroy();
   currentGame = new JourneyGame(
     canvas,
-    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
+    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, bottomInset: bottomInsetFor(size.height), emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
     images,
     {
       onItem: (item, count, total) => {
@@ -233,6 +243,8 @@ function startJourney() {
     }
   );
   currentGame.start();
+  // Cờ gỡ lỗi: mở trang với #debug để truy cập ván chơi từ console (window.__game)
+  if (location.hash.includes("debug")) window.__game = currentGame;
   initAudio();
   clearInterval(timeTimer);
   timeTimer = setInterval(() => {
@@ -475,7 +487,7 @@ function wireUI() {
     resizeTimer = setTimeout(() => {
       if (!currentGame) return;
       const s = canvasSizeForViewport();
-      currentGame.resize(s.width, s.height);
+      currentGame.resize(s.width, s.height, bottomInsetFor(s.height));
     }, 150);
   });
 }
@@ -549,7 +561,8 @@ async function init() {
   await preloadAll();
   startBtn.disabled = false;
   startBtn.textContent = "Start the journey";
-  if (location.hash === "#autostart") startBtn.click(); // mở thẳng vào game (dùng để test)
+  // #autostart: vào thẳng màn chơi (dùng khi thử nghiệm)
+  if (location.hash.includes("autostart")) startBtn.click();
 }
 
 init();

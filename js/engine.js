@@ -38,8 +38,11 @@ const LEFT_KEYS = ["ArrowLeft", "a", "A"];
 const RIGHT_KEYS = ["ArrowRight", "d", "D"];
 const JUMP_KEYS = ["ArrowUp", "w", "W", " ", "Spacebar"];
 
-function groundMarginFor(ch) {
-  return Math.max(60, Math.min(ch * 0.16, 170));
+// Khoảng chừa dưới mặt đường: đủ chỗ cho dải đường + gạch, và luôn cao hơn hàng nút
+// cảm ứng (bottomInset, tính bằng px thế giới) để nhân vật không bị nút che.
+function groundMarginFor(ch, bottomInset = 0) {
+  const margin = Math.max(60, Math.min(ch * 0.16, 170), bottomInset);
+  return Math.min(margin, ch * 0.42); // không để mặt đường bị đẩy lên quá cao
 }
 function terrainHeightFor(groundY) {
   return Math.max(260, Math.min(groundY * 0.5, 380));
@@ -60,7 +63,8 @@ export class JourneyGame {
     this.ctx = canvas.getContext("2d");
     this.CW = canvas.width || CW;
     this.CH = canvas.height || CH;
-    this.groundY = this.CH - groundMarginFor(this.CH);
+    this.bottomInset = content.bottomInset || 0;
+    this.groundY = this.CH - groundMarginFor(this.CH, this.bottomInset);
     this.images = images;
     this.cb = callbacks;
     this.content = content;
@@ -231,14 +235,15 @@ export class JourneyGame {
     this.keys[name] = false;
   }
 
-  resize(newWidth, newHeight) {
+  resize(newWidth, newHeight, bottomInset) {
     if (!newWidth || !newHeight) return;
-    if (newWidth === this.CW && newHeight === this.CH) return;
+    if (bottomInset != null) this.bottomInset = bottomInset;
+    if (newWidth === this.CW && newHeight === this.CH && bottomInset == null) return;
     this.canvas.width = newWidth;
     this.canvas.height = newHeight;
     this.CW = newWidth;
     this.CH = newHeight;
-    this.groundY = newHeight - groundMarginFor(newHeight);
+    this.groundY = newHeight - groundMarginFor(newHeight, this.bottomInset);
     const floor = this.groundY - this.player.h;
     if (this.player.onGround || this.player.y > floor) {
       this.player.y = floor;

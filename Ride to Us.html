@@ -746,8 +746,11 @@ const LEFT_KEYS = ["ArrowLeft", "a", "A"];
 const RIGHT_KEYS = ["ArrowRight", "d", "D"];
 const JUMP_KEYS = ["ArrowUp", "w", "W", " ", "Spacebar"];
 
-function groundMarginFor(ch) {
-  return Math.max(60, Math.min(ch * 0.16, 170));
+// Khoảng chừa dưới mặt đường: đủ chỗ cho dải đường + gạch, và luôn cao hơn hàng nút
+// cảm ứng (bottomInset, tính bằng px thế giới) để nhân vật không bị nút che.
+function groundMarginFor(ch, bottomInset = 0) {
+  const margin = Math.max(60, Math.min(ch * 0.16, 170), bottomInset);
+  return Math.min(margin, ch * 0.42); // không để mặt đường bị đẩy lên quá cao
 }
 function terrainHeightFor(groundY) {
   return Math.max(260, Math.min(groundY * 0.5, 380));
@@ -768,7 +771,8 @@ class JourneyGame {
     this.ctx = canvas.getContext("2d");
     this.CW = canvas.width || CW;
     this.CH = canvas.height || CH;
-    this.groundY = this.CH - groundMarginFor(this.CH);
+    this.bottomInset = content.bottomInset || 0;
+    this.groundY = this.CH - groundMarginFor(this.CH, this.bottomInset);
     this.images = images;
     this.cb = callbacks;
     this.content = content;
@@ -939,14 +943,15 @@ class JourneyGame {
     this.keys[name] = false;
   }
 
-  resize(newWidth, newHeight) {
+  resize(newWidth, newHeight, bottomInset) {
     if (!newWidth || !newHeight) return;
-    if (newWidth === this.CW && newHeight === this.CH) return;
+    if (bottomInset != null) this.bottomInset = bottomInset;
+    if (newWidth === this.CW && newHeight === this.CH && bottomInset == null) return;
     this.canvas.width = newWidth;
     this.canvas.height = newHeight;
     this.CW = newWidth;
     this.CH = newHeight;
-    this.groundY = newHeight - groundMarginFor(newHeight);
+    this.groundY = newHeight - groundMarginFor(newHeight, this.bottomInset);
     const floor = this.groundY - this.player.h;
     if (this.player.onGround || this.player.y > floor) {
       this.player.y = floor;
@@ -2632,6 +2637,16 @@ function canvasSizeForViewport() {
   return { width, height };
 }
 
+// Hàng nút cảm ứng cao bao nhiêu (đổi sang px thế giới) — mặt đường luôn nằm trên nó
+function bottomInsetFor(canvasHeight) {
+  const pad = document.querySelector(".touch-controls");
+  if (!pad || getComputedStyle(pad).display === "none") return 0;
+  const padPx = pad.getBoundingClientRect().height;
+  if (!padPx) return 0;
+  const scale = canvasHeight / (window.innerHeight || canvasHeight);
+  return Math.round(padPx * scale) + 34; // chừa thêm một khoảng cho thoáng
+}
+
 // ---------------- helpers màn hình ----------------
 const $ = (id) => document.getElementById(id);
 function showScreen(id) {
@@ -2760,7 +2775,7 @@ function startJourney() {
   if (currentGame) currentGame.destroy();
   currentGame = new JourneyGame(
     canvas,
-    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
+    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, bottomInset: bottomInsetFor(size.height), emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
     images,
     {
       onItem: (item, count, total) => {
@@ -2796,6 +2811,8 @@ function startJourney() {
     }
   );
   currentGame.start();
+  // Cờ gỡ lỗi: mở trang với #debug để truy cập ván chơi từ console (window.__game)
+  if (location.hash.includes("debug")) window.__game = currentGame;
   initAudio();
   clearInterval(timeTimer);
   timeTimer = setInterval(() => {
@@ -3038,7 +3055,7 @@ function wireUI() {
     resizeTimer = setTimeout(() => {
       if (!currentGame) return;
       const s = canvasSizeForViewport();
-      currentGame.resize(s.width, s.height);
+      currentGame.resize(s.width, s.height, bottomInsetFor(s.height));
     }, 150);
   });
 }
@@ -3112,7 +3129,8 @@ async function init() {
   await preloadAll();
   startBtn.disabled = false;
   startBtn.textContent = "Start the journey";
-  if (location.hash === "#autostart") startBtn.click(); // mở thẳng vào game (dùng để test)
+  // #autostart: vào thẳng màn chơi (dùng khi thử nghiệm)
+  if (location.hash.includes("autostart")) startBtn.click();
 }
 
 init();
