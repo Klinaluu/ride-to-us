@@ -133,7 +133,7 @@ button { font-family: var(--font-body); cursor: pointer; }
 
 /* ---------------- TITLE / ENDING ----------------
    Nền = cảnh pixel BG-Sunset / BG-Sea phủ kín + con đường Road-Horizon chạy về chân trời */
-#screen-title, #screen-ending { padding: 20px; overflow: hidden; }
+#screen-title, #screen-ending { padding: 20px; overflow-y: auto; }
 .scene-bg .scene-sky {
   position: absolute;
   inset: 0;
@@ -174,6 +174,7 @@ button { font-family: var(--font-body); cursor: pointer; }
 }
 .game-subtitle { color: var(--ink-dim); margin: 0 0 16px; font-size: 14px; }
 .title-hero { width: 170px; filter: drop-shadow(4px 4px 0 rgba(43,32,48,0.25)); margin-bottom: 18px; }
+.title-tip.tip-plain { font-family: var(--font-body); font-size: 12px; letter-spacing: 0; }
 .title-tip { margin-top: 14px; font-family: var(--font-title); font-size: 8px; color: var(--ink-dim); letter-spacing: 0.5px; }
 
 .ending-win { max-width: 480px; }
@@ -202,6 +203,9 @@ button { font-family: var(--font-body); cursor: pointer; }
   gap: 14px;
   padding: 7px 12px;
   padding-top: max(7px, env(safe-area-inset-top));
+  /* nằm ngang trên iPhone: tai thỏ nằm bên trái → đẩy tim vào trong */
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(92px, calc(env(safe-area-inset-right) + 92px));
   background: rgba(255, 247, 250, 0.9);
   border-bottom: 3px solid var(--ink);
   box-shadow: inset 0 -3px 0 var(--bevel-lo), inset 0 3px 0 var(--bevel-hi);
@@ -644,8 +648,10 @@ button { font-family: var(--font-body); cursor: pointer; }
 
 /* khung ảnh trống ở màn hình start (bản demo) */
 .title-hero.frame {
-  width: min(280px, 70%);
-  height: min(30vh, 210px);
+  width: min(230px, 58%);
+  aspect-ratio: 4 / 3;
+  height: auto;
+  max-height: 26vh;
   margin: 0 auto 16px;
   display: flex;
   align-items: center;
@@ -722,4 +728,21 @@ button { font-family: var(--font-body); cursor: pointer; }
   .touch-btn { width: 42px; height: 42px; font-size: 16px; border-width: 2px; }
   .touch-btn.jump { width: 52px; height: 52px; font-size: 19px; }
   .touch-controls { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+}
+
+/* Màn hình nằm ngang thấp (iPhone): thu gọn cửa sổ tiêu đề cho vừa, không bị cắt đáy */
+@media (max-height: 520px) and (orientation: landscape) {
+  #screen-title, #screen-ending { padding: 10px; }
+  .hud { padding-left: max(18px, calc(env(safe-area-inset-left) + 8px)); }
+  .title-win, .ending-win { max-width: 600px; }
+  .title-card { padding: 10px 18px 12px; }
+  .game-title { font-size: clamp(18px, 3.4vw, 26px); margin: 0 0 10px; }
+  .game-subtitle { font-size: 12px; margin-bottom: 8px; }
+  .title-hero.frame { width: auto; height: clamp(68px, 20vh, 96px); max-height: none; font-size: 6px; line-height: 1.7; margin-bottom: 10px; padding: 6px; }
+  .title-hero.photo img { max-height: 25vh; }
+  .title-card .pixel-btn { font-size: 10px; padding: 9px 14px; }
+  .title-tip { margin-top: 5px; font-size: 7px; }
+  .tip-link { font-size: 11px; }
+  .ending-couple { width: min(220px, 40%); }
+  .ending-content { padding: 10px 18px 14px; }
 }
