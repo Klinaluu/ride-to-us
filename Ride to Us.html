@@ -2420,13 +2420,16 @@ function drawPolaroid(ctx, photo, date, x, y, t, i, name, placeholder) {
   }
   // chú thích: ngày (to) + tên (nhỏ); không có ngày thì tên đứng một mình
   ctx.textAlign = "center";
+  // Font pixel không có dấu tiếng Việt: chữ nào ngoài bảng ASCII thì dùng font thường.
+  const fontFor = (txt, px) =>
+    /^[\x20-\x7E]*$/.test(txt) ? `${px}px 'Press Start 2P', monospace` : `600 ${px + 4}px 'Be Vietnam Pro', sans-serif`;
   const lines = [];
-  if (date) lines.push([date, "10px", "#6b3f52"]);
-  if (name) lines.push([name, date ? "8px" : "10px", date ? "#a97a92" : "#6b3f52"]);
+  if (date) lines.push([date, 10, "#6b3f52"]);
+  if (name) lines.push([name, date ? 8 : 10, date ? "#a97a92" : "#6b3f52"]);
   let ly = h / 2 - (lines.length === 2 ? 22 : 15);
-  for (const [txt, size, color] of lines) {
-    ctx.font = `${size} 'Press Start 2P', monospace`;
-    if (ctx.measureText(txt).width > w - 12) ctx.font = "6px 'Press Start 2P', monospace";
+  for (const [txt, px, color] of lines) {
+    ctx.font = fontFor(txt, px);
+    if (ctx.measureText(txt).width > w - 12) ctx.font = fontFor(txt, px - 2);
     ctx.fillStyle = color;
     ctx.fillText(txt, 0, ly);
     ly += 13;
