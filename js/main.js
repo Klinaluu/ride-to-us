@@ -3,7 +3,7 @@
 // ============================================================
 import {
   IMG, ITEMS, SOLO_SEGMENTS, SOLO_SEG_W, WALK_TERRAIN, BOSS_TERRAIN, MEET_TERRAIN, MAX_HEARTS, MAN_LINE, MEET_TEXT, MILESTONES, SCENES, SCENE_SPEEDS, SCENE_SINK, SCENE_TOP, GRASS_SCENES, PROPS, PROP_SETS,
-  SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, GAME_TITLE,
+  SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, GAME_TITLE, EMPTY_POLAROIDS, PHOTO_PLACEHOLDER,
 } from "./content.js";
 import { initAudio, sfx, setMuted, isMuted } from "./audio.js";
 import { JourneyGame } from "./engine.js";
@@ -196,7 +196,7 @@ function startJourney() {
   if (currentGame) currentGame.destroy();
   currentGame = new JourneyGame(
     canvas,
-    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS },
+    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
     images,
     {
       onItem: (item, count, total) => {
@@ -280,10 +280,16 @@ function openLetter(fromEnding) {
 function openVideo(fromEnding) {
   const video = $("video-player");
   const missing = $("video-missing");
-  missing.classList.add("hidden");
-  video.classList.remove("hidden");
-  video.src = VIDEO_SRC;
-  video.load();
+  if (VIDEO_SRC) {
+    missing.classList.add("hidden");
+    video.classList.remove("hidden");
+    video.src = VIDEO_SRC;
+    video.load();
+  } else {
+    // bản demo: chưa có video của bạn
+    video.classList.add("hidden");
+    missing.classList.remove("hidden");
+  }
   $("btn-video-done").textContent = fromEnding ? "Close" : "Continue ▸";
   $("btn-video-done").dataset.fromEnding = fromEnding ? "1" : "";
   showModal("modal-video");

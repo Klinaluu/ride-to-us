@@ -876,9 +876,9 @@ export class JourneyGame {
 
     for (const ms of this.milestones) {
       const photo = img.polaroids[ms.index];
-      if (!photo) continue; // mốc không có ảnh thì không treo khung
+      if (!photo && !this.content.emptyPolaroids) continue; // mốc không có ảnh thì không treo khung
       if (ms.polaroidX < this.camX - 300 || ms.polaroidX > this.camX + this.CW + 300) continue;
-      drawPolaroid(ctx, photo, ms.date, ms.polaroidX, Math.max(60, this.groundY - 360), this.t, ms.index, ms.name);
+      drawPolaroid(ctx, photo, ms.date, ms.polaroidX, Math.max(60, this.groundY - 360), this.t, ms.index, ms.name, this.content.photoPlaceholder);
     }
 
     for (const ex of this.extras) {
@@ -1628,7 +1628,7 @@ function drawWoman(ctx, image, x, groundY, t, cheer) {
 
 
 // Khung polaroid: viền pixel, bóng cứng lệch, dây treo
-function drawPolaroid(ctx, photo, date, x, y, t, i, name) {
+function drawPolaroid(ctx, photo, date, x, y, t, i, name, placeholder) {
   // Khung ôm theo tỉ lệ ảnh thật (không crop): ảnh vừa trong hộp MAX×MAX, viền 8, đáy 44 cho chữ
   const MAX = 150;
   const PAD = 8;
@@ -1674,10 +1674,36 @@ function drawPolaroid(ctx, photo, date, x, y, t, i, name) {
   } else {
     ctx.fillStyle = "#f3e4ea";
     ctx.fillRect(px, py, iw, ih);
-    ctx.fillStyle = "rgba(224,83,138,0.35)";
-    ctx.font = "26px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("♡", 0, py + ih / 2 + 9);
+    if (placeholder) {
+      // khung trống của bản demo: viền đứt + chữ hướng dẫn xuống dòng
+      ctx.strokeStyle = "rgba(224,83,138,0.55)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
+      ctx.strokeRect(px + 5, py + 5, iw - 10, ih - 10);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(224,83,138,0.8)";
+      ctx.font = "8px 'Press Start 2P', monospace";
+      const lines = [];
+      let line = "";
+      for (const word of placeholder.split(" ")) {
+        const next = line ? line + " " + word : word;
+        if (ctx.measureText(next).width > iw - 22 && line) {
+          lines.push(line);
+          line = word;
+        } else line = next;
+      }
+      if (line) lines.push(line);
+      let ty = py + ih / 2 - (lines.length - 1) * 7;
+      for (const l of lines) {
+        ctx.fillText(l, 0, ty);
+        ty += 14;
+      }
+    } else {
+      ctx.fillStyle = "rgba(224,83,138,0.35)";
+      ctx.font = "26px sans-serif";
+      ctx.fillText("♡", 0, py + ih / 2 + 9);
+    }
   }
   // chú thích: ngày (to) + tên (nhỏ); không có ngày thì tên đứng một mình
   ctx.textAlign = "center";

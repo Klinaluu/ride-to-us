@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ride to Us">
 <meta name="theme-color" content="#2b2030">
-<!-- Bản chạy trực tiếp (double-click). Nguồn: index.html + js/*.js — build lại bằng tools/build_standalone.py -->
+<!-- Ban chay truc tiep (double-click). Nguon: index.html + js/*.js — build lai bang tools/build_standalone.py -->
 <title>Ride to Us</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -218,6 +218,9 @@ const SCENE_SINK = Object.fromEntries(SCENE_IDS.map((id) => [id, 160]));
 
 const GAME_TITLE = "RIDE TO US";
 const GAME_SUBTITLE = "Our first year journey";
+// Bản demo (madeforus) bật hai cờ này để hiện khung ảnh trống có chữ hướng dẫn
+const EMPTY_POLAROIDS = false;
+const PHOTO_PLACEHOLDER = "";
 
 // ---------- ảnh dùng chung ----------
 const IMG = {
@@ -391,7 +394,7 @@ const VIDEO_SRC = "Assets2/video/little-movie.mp4";
 
 const ENDING_TEXT = "Happy our 1 year anniversary, cheers to our next chapter together";
 
-return { SCENES, SCENE_IDS, SCENE_SPEEDS, GRASS_SCENES, SCENE_TOP, SCENE_SINK, GAME_TITLE, GAME_SUBTITLE, IMG, PROPS, PROP_SETS, ITEMS, SOLO_SEG_W, WALK_TERRAIN, BOSS_TERRAIN, MEET_TERRAIN, SOLO_SEGMENTS, MAX_HEARTS, MAN_LINE, MEET_TEXT, MILESTONES, SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, ENDING_TEXT };
+return { SCENES, SCENE_IDS, SCENE_SPEEDS, GRASS_SCENES, SCENE_TOP, SCENE_SINK, GAME_TITLE, GAME_SUBTITLE, EMPTY_POLAROIDS, PHOTO_PLACEHOLDER, IMG, PROPS, PROP_SETS, ITEMS, SOLO_SEG_W, WALK_TERRAIN, BOSS_TERRAIN, MEET_TERRAIN, SOLO_SEGMENTS, MAX_HEARTS, MAN_LINE, MEET_TEXT, MILESTONES, SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, ENDING_TEXT };
 })();
 
 const __mod_audio = (() => {
@@ -1370,9 +1373,9 @@ class JourneyGame {
 
     for (const ms of this.milestones) {
       const photo = img.polaroids[ms.index];
-      if (!photo) continue; // mốc không có ảnh thì không treo khung
+      if (!photo && !this.content.emptyPolaroids) continue; // mốc không có ảnh thì không treo khung
       if (ms.polaroidX < this.camX - 300 || ms.polaroidX > this.camX + this.CW + 300) continue;
-      drawPolaroid(ctx, photo, ms.date, ms.polaroidX, Math.max(60, this.groundY - 360), this.t, ms.index, ms.name);
+      drawPolaroid(ctx, photo, ms.date, ms.polaroidX, Math.max(60, this.groundY - 360), this.t, ms.index, ms.name, this.content.photoPlaceholder);
     }
 
     for (const ex of this.extras) {
@@ -2122,7 +2125,7 @@ function drawWoman(ctx, image, x, groundY, t, cheer) {
 
 
 // Khung polaroid: viền pixel, bóng cứng lệch, dây treo
-function drawPolaroid(ctx, photo, date, x, y, t, i, name) {
+function drawPolaroid(ctx, photo, date, x, y, t, i, name, placeholder) {
   // Khung ôm theo tỉ lệ ảnh thật (không crop): ảnh vừa trong hộp MAX×MAX, viền 8, đáy 44 cho chữ
   const MAX = 150;
   const PAD = 8;
@@ -2168,10 +2171,36 @@ function drawPolaroid(ctx, photo, date, x, y, t, i, name) {
   } else {
     ctx.fillStyle = "#f3e4ea";
     ctx.fillRect(px, py, iw, ih);
-    ctx.fillStyle = "rgba(224,83,138,0.35)";
-    ctx.font = "26px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("♡", 0, py + ih / 2 + 9);
+    if (placeholder) {
+      // khung trống của bản demo: viền đứt + chữ hướng dẫn xuống dòng
+      ctx.strokeStyle = "rgba(224,83,138,0.55)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
+      ctx.strokeRect(px + 5, py + 5, iw - 10, ih - 10);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(224,83,138,0.8)";
+      ctx.font = "8px 'Press Start 2P', monospace";
+      const lines = [];
+      let line = "";
+      for (const word of placeholder.split(" ")) {
+        const next = line ? line + " " + word : word;
+        if (ctx.measureText(next).width > iw - 22 && line) {
+          lines.push(line);
+          line = word;
+        } else line = next;
+      }
+      if (line) lines.push(line);
+      let ty = py + ih / 2 - (lines.length - 1) * 7;
+      for (const l of lines) {
+        ctx.fillText(l, 0, ty);
+        ty += 14;
+      }
+    } else {
+      ctx.fillStyle = "rgba(224,83,138,0.35)";
+      ctx.font = "26px sans-serif";
+      ctx.fillText("♡", 0, py + ih / 2 + 9);
+    }
   }
   // chú thích: ngày (to) + tên (nhỏ); không có ngày thì tên đứng một mình
   ctx.textAlign = "center";
@@ -2327,7 +2356,7 @@ const __mod_main = (() => {
 // ============================================================
 // RIDE TO US — điều phối màn hình, HUD, các đoạn cắt cảnh
 // ============================================================
-const {IMG, ITEMS, SOLO_SEGMENTS, SOLO_SEG_W, WALK_TERRAIN, BOSS_TERRAIN, MEET_TERRAIN, MAX_HEARTS, MAN_LINE, MEET_TEXT, MILESTONES, SCENES, SCENE_SPEEDS, SCENE_SINK, SCENE_TOP, GRASS_SCENES, PROPS, PROP_SETS, SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, GAME_TITLE,} = __mod_content;
+const {IMG, ITEMS, SOLO_SEGMENTS, SOLO_SEG_W, WALK_TERRAIN, BOSS_TERRAIN, MEET_TERRAIN, MAX_HEARTS, MAN_LINE, MEET_TEXT, MILESTONES, SCENES, SCENE_SPEEDS, SCENE_SINK, SCENE_TOP, GRASS_SCENES, PROPS, PROP_SETS, SYSTEM_MESSAGE, ENVELOPE_LABEL, LETTER_TEXT, VIDEO_SRC, GAME_TITLE, EMPTY_POLAROIDS, PHOTO_PLACEHOLDER,} = __mod_content;
 const {initAudio, sfx, setMuted, isMuted} = __mod_audio;
 const {JourneyGame} = __mod_engine;
 
@@ -2519,7 +2548,7 @@ function startJourney() {
   if (currentGame) currentGame.destroy();
   currentGame = new JourneyGame(
     canvas,
-    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS },
+    { soloSegments: SOLO_SEGMENTS, soloSegW: SOLO_SEG_W, walkTerrain: WALK_TERRAIN, bossTerrain: BOSS_TERRAIN, meetTerrain: MEET_TERRAIN, items: ITEMS, milestones: MILESTONES, maxHearts: MAX_HEARTS, grassScenes: GRASS_SCENES, propSets: PROP_SETS, emptyPolaroids: EMPTY_POLAROIDS, photoPlaceholder: PHOTO_PLACEHOLDER },
     images,
     {
       onItem: (item, count, total) => {
@@ -2603,10 +2632,16 @@ function openLetter(fromEnding) {
 function openVideo(fromEnding) {
   const video = $("video-player");
   const missing = $("video-missing");
-  missing.classList.add("hidden");
-  video.classList.remove("hidden");
-  video.src = VIDEO_SRC;
-  video.load();
+  if (VIDEO_SRC) {
+    missing.classList.add("hidden");
+    video.classList.remove("hidden");
+    video.src = VIDEO_SRC;
+    video.load();
+  } else {
+    // bản demo: chưa có video của bạn
+    video.classList.add("hidden");
+    missing.classList.remove("hidden");
+  }
   $("btn-video-done").textContent = fromEnding ? "Close" : "Continue ▸";
   $("btn-video-done").dataset.fromEnding = fromEnding ? "1" : "";
   showModal("modal-video");

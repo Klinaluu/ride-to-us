@@ -639,3 +639,22 @@ button { font-family: var(--font-body); cursor: pointer; }
   margin: 0 auto 16px;
 }
 @media (max-height: 520px) { .title-hero.photo { height: 30vh; margin-bottom: 8px; } }
+
+/* khung ảnh trống ở màn hình start (bản demo) */
+.title-hero.frame {
+  width: min(280px, 70%);
+  height: min(30vh, 210px);
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  font-family: var(--font-title);
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--accent-deep);
+  background: var(--paper-2);
+  border: 3px dashed var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}

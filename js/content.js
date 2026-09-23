@@ -29,6 +29,9 @@ export const SCENE_SINK = Object.fromEntries(SCENE_IDS.map((id) => [id, 160]));
 
 export const GAME_TITLE = "RIDE TO US";
 export const GAME_SUBTITLE = "Our first year journey";
+// Bản demo (madeforus) bật hai cờ này để hiện khung ảnh trống có chữ hướng dẫn
+export const EMPTY_POLAROIDS = false;
+export const PHOTO_PLACEHOLDER = "";
 
 // ---------- ảnh dùng chung ----------
 export const IMG = {
