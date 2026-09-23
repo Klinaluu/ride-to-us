@@ -14,14 +14,18 @@ const SEEN_DAYS = 7;
 
 // Trình duyệt nhúng trong các app nhắn tin / mạng xã hội
 const IN_APP = /FBAN|FBAV|FB_IAB|Messenger|Instagram|Zalo|Line\/|MicroMessenger|TikTok|Twitter/i;
+// Chrome (CriOS), Firefox (FxiOS), Edge (EdgiOS), Opera (OPiOS) trên iOS
+const OTHER_IOS_BROWSER = /CriOS|FxiOS|EdgiOS|OPiOS/i;
 
 export function detectPlatform(ua = navigator.userAgent, touch = matchMedia("(hover: none)").matches) {
   const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   const android = /Android/i.test(ua);
-  const mobile = ios || android || touch;
-  if (!mobile) return "desktop";
-  if (IN_APP.test(ua)) return "in-app";
-  return ios ? "ios" : "android";
+  if (!(ios || android || touch)) return "desktop";
+  // Trình duyệt nhúng trong app nhắn tin: không thêm được vào màn hình chính
+  if (IN_APP.test(ua)) return ios ? "in-app-ios" : "in-app";
+  // iPhone/iPad: chỉ Safari mới có "Thêm vào MH chính"; Chrome/Firefox/Edge trên iOS thì không
+  if (ios) return OTHER_IOS_BROWSER.test(ua) ? "ios-other" : "ios";
+  return "android";
 }
 
 export function isInstalled() {
@@ -51,9 +55,20 @@ const COPY = {
     heading: "Mở bằng trình duyệt nhé",
     steps: [
       "Bấm dấu ••• ở góc trên màn hình",
-      "Chọn “Mở trong Safari” (iPhone) hoặc “Mở bằng Chrome” (Android)",
+      "Chọn “Mở bằng Chrome”",
       "Rồi thêm vào màn hình chính để chơi toàn màn hình",
     ],
+    action: "Sao chép link",
+  },
+  "in-app-ios": {
+    title: "MO_BANG_SAFARI",
+    heading: "Mở bằng Safari nhé",
+    steps: [
+      "Bấm “Sao chép link” bên dưới",
+      "Mở app Safari rồi dán link vào ô địa chỉ",
+      "Bấm nút Chia sẻ → “Thêm vào MH chính”",
+    ],
+    note: "Trên iPhone chỉ Safari mới thêm được vào màn hình chính (Chrome thì không có mục này).",
     action: "Sao chép link",
   },
   ios: {
@@ -65,6 +80,17 @@ const COPY = {
       "Mở từ icon mới — toàn màn hình, không còn thanh địa chỉ",
     ],
     action: "Đã hiểu",
+  },
+  "ios-other": {
+    title: "MO_BANG_SAFARI",
+    heading: "Mở bằng Safari nhé",
+    steps: [
+      "Bấm “Sao chép link” bên dưới",
+      "Mở app Safari rồi dán link vào ô địa chỉ",
+      "Bấm nút Chia sẻ → “Thêm vào MH chính”",
+    ],
+    note: "Trên iPhone chỉ Safari mới thêm được vào màn hình chính (Chrome thì không có mục này).",
+    action: "Sao chép link",
   },
   android: {
     title: "THEM_VAO_MH_CHINH",
@@ -91,7 +117,9 @@ function buildModal(platform, text) {
       <div class="win-body">
         <div class="install-heading">${copy.heading}</div>
         <ol class="install-steps">${copy.steps.map((s) => `<li>${s}</li>`).join("")}</ol>
+        ${copy.note ? `<p class="install-note">${copy.note}</p>` : ""}
         <button class="pixel-btn primary" data-action>${copy.action}</button>
+        <input class="install-link hidden" data-link readonly value="${location.href}">
       </div>
     </div>`;
   return modal;
@@ -107,6 +135,7 @@ export function maybeShowInstallHint(opts = {}) {
   if (!opts.force && seenRecently()) return false;
 
   const modal = buildModal(platform, opts.text);
+  const copyText = opts.text && opts.text.common;
   document.body.appendChild(modal);
   remember();
 
@@ -116,6 +145,7 @@ export function maybeShowInstallHint(opts = {}) {
     if (e.target === modal) close();
   });
 
+  const copiedLabel = (copyText && copyText.copied) || "Đã sao chép ✓";
   const action = modal.querySelector("[data-action]");
   action.addEventListener("click", async () => {
     if (platform === "android" && deferredPrompt) {
@@ -124,14 +154,18 @@ export function maybeShowInstallHint(opts = {}) {
       close();
       return;
     }
-    if (platform === "in-app" && navigator.clipboard) {
+    if (platform.startsWith("in-app") || platform === "ios-other") {
       try {
         await navigator.clipboard.writeText(location.href);
-        action.textContent = "Link copied ✓";
-        setTimeout(close, 1200);
+        action.textContent = copiedLabel;
         return;
       } catch (e) {
-        /* không copy được thì cứ đóng */
+        // không copy được (thường do trình duyệt trong app): hiện ô link để tự chọn
+        const box = modal.querySelector("[data-link]");
+        box.classList.remove("hidden");
+        box.focus();
+        box.setSelectionRange(0, box.value.length);
+        return;
       }
     }
     close();

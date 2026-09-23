@@ -677,6 +677,24 @@ button { font-family: var(--font-body); cursor: pointer; }
   color: var(--ink-soft);
 }
 .install-steps li + li { margin-top: 6px; }
+.install-note {
+  margin: -6px 0 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.install-link {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 10px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 2px solid var(--ink);
+}
 /* nút trong hộp thoại này dùng font thường cho đọc được dấu tiếng Việt */
 #modal-install .pixel-btn { font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: 0; padding: 11px 20px; }
 .tip-link {
