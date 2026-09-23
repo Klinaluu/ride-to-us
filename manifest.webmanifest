@@ -1,0 +1,17 @@
+{
+  "name": "Ride to Us",
+  "short_name": "Ride to Us",
+  "description": "Our first year journey — một game pixel nhỏ kể lại một năm của tụi mình.",
+  "lang": "vi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#ff6fa0",
+  "theme_color": "#ff6fa0",
+  "icons": [
+    { "src": "Assets2/share/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "Assets2/share/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "Assets2/share/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
