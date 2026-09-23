@@ -736,13 +736,15 @@ button { font-family: var(--font-body); cursor: pointer; }
   .hud { padding-left: max(18px, calc(env(safe-area-inset-left) + 8px)); }
   .title-win, .ending-win { max-width: 600px; }
   .title-card { padding: 10px 18px 12px; }
-  .game-title { font-size: clamp(18px, 3.4vw, 26px); margin: 0 0 10px; }
-  .game-subtitle { font-size: 12px; margin-bottom: 8px; }
-  .title-hero.frame { width: auto; height: clamp(68px, 20vh, 96px); max-height: none; font-size: 6px; line-height: 1.7; margin-bottom: 10px; padding: 6px; }
-  .title-hero.photo img { max-height: 25vh; }
-  .title-card .pixel-btn { font-size: 10px; padding: 9px 14px; }
-  .title-tip { margin-top: 5px; font-size: 7px; }
-  .tip-link { font-size: 11px; }
+  .game-title { font-size: clamp(15px, 2.4vw, 20px); margin: 0 0 8px; letter-spacing: 1px; }
+  .game-subtitle { font-size: 11px; margin-bottom: 10px; }
+  .title-hero.frame { width: auto; height: clamp(104px, 36vh, 150px); max-height: none; font-size: 7px; line-height: 1.8; margin-bottom: 12px; padding: 8px; }
+  .title-hero.photo img { max-height: 40vh; }
+  img.title-hero.photo { height: min(40vh, 220px); width: auto; }
+  .title-card .pixel-btn { font-size: 9px; padding: 8px 13px; }
+  .title-tip { margin-top: 5px; font-size: 6px; }
+  .tip-link { font-size: 10px; }
+  .title-tip.tip-plain { font-size: 10px; }
   .ending-couple { width: min(220px, 40%); }
   .ending-content { padding: 10px 18px 14px; }
 }
