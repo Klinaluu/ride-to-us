@@ -590,7 +590,8 @@ button { font-family: var(--font-body); cursor: pointer; }
 }
 .rotate-icon { font-size: 56px; color: var(--accent); margin-bottom: 10px; animation: spin-hint 2.4s ease-in-out infinite; display: inline-block; }
 @keyframes spin-hint { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(90deg); } }
-@media (orientation: portrait) and (min-width: 600px) and (hover: none) {
+/* điện thoại lẫn máy tính bảng: cầm dọc thì nhắc xoay ngang */
+@media (orientation: portrait) and (hover: none) {
   #rotate-overlay { display: flex; }
 }
 
@@ -711,3 +712,6 @@ button { font-family: var(--font-body); cursor: pointer; }
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* nhắc xoay ngang: chữ Việt nên dùng font thường (font pixel không có dấu) */
+#rotate-overlay .box-title { font-family: var(--font-body); font-size: 19px; font-weight: 700; }
